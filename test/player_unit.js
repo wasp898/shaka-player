@@ -1409,7 +1409,7 @@ describe('Player', function() {
 
       player.selectVariantTrack(track);
       expect(streamingEngine.switchVariant)
-          .toHaveBeenCalledWith(variant, false);
+          .toHaveBeenCalledWith(variant, false, 0);
     });
 
     it('still switches streams if called during startup', function() {
@@ -1428,7 +1428,7 @@ describe('Player', function() {
       // after startup is complete, the manual selection takes effect.
       streamingEngine.onCanSwitch();
       expect(streamingEngine.switchVariant)
-          .toHaveBeenCalledWith(variant, false);
+          .toHaveBeenCalledWith(variant, false, 0);
     });
 
     it('still switches streams if called while switching Periods', function() {
@@ -1452,7 +1452,7 @@ describe('Player', function() {
       // after transition is completed by onCanSwitch, switchVariant is called
       streamingEngine.onCanSwitch();
       expect(streamingEngine.switchVariant)
-          .toHaveBeenCalledWith(variant, false);
+          .toHaveBeenCalledWith(variant, false, 0);
     });
 
     it('switching audio doesn\'t change selected text track', function() {
@@ -1499,7 +1499,7 @@ describe('Player', function() {
           player.selectAudioLanguage('es');
 
           expect(streamingEngine.switchVariant)
-              .toHaveBeenCalledWith(spanishVariant, true);
+              .toHaveBeenCalledWith(spanishVariant, true, 0);
           expect(getActiveVariantTrack().language).toBe('es');
         });
 
@@ -1535,7 +1535,7 @@ describe('Player', function() {
       player.selectAudioLanguage('es');
 
       expect(streamingEngine.switchVariant)
-          .toHaveBeenCalledWith(spanishVariant, true);
+          .toHaveBeenCalledWith(spanishVariant, true, 0);
       expect(getActiveVariantTrack().language).toBe('es');
     });
 
