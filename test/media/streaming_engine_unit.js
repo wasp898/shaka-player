@@ -449,7 +449,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
     }
 
@@ -615,6 +616,35 @@ describe('StreamingEngine', function() {
     });
 
     verifyNetworkingEngineRequestCalls(2);
+  });
+
+  describe('unloadTextStream', function() {
+    it('doesn\'t send requests for text after calling unload', function() {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+      playhead.getTime.and.returnValue(0);
+      onStartupComplete.and.callFake(function() {setupFakeGetTime(0);});
+      onChooseStreams.and.callFake(onChooseStreamsWithUnloadedText);
+
+      streamingEngine.init();
+      var segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+      // Verify that after unloading text stream, no network request for text
+      // is sent.
+      runTest(function() {
+        if (playheadTime == 1) {
+          netEngine.expectRequest('1_text_1', segmentType);
+          netEngine.request.calls.reset();
+          streamingEngine.unloadTextStream();
+        } else if (playheadTime == 35) {
+          netEngine.expectNoRequest('1_text_1', segmentType);
+          netEngine.expectNoRequest('1_text_2', segmentType);
+          netEngine.expectNoRequest('2_text_1', segmentType);
+          netEngine.expectNoRequest('2_text_2', segmentType);
+        }
+      });
+    });
   });
 
   it('initializes and plays live', function() {
@@ -1793,7 +1823,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: true,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
       createStreamingEngine(config);
 
@@ -1830,7 +1861,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
       createStreamingEngine(config);
 
@@ -1874,7 +1906,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
       createStreamingEngine(config);
 
@@ -1920,7 +1953,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
       createStreamingEngine(config);
 
@@ -1972,7 +2006,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
       createStreamingEngine(config);
 
@@ -2129,7 +2164,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2217,7 +2253,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2287,7 +2324,8 @@ describe('StreamingEngine', function() {
         ignoreTextStreamFailures: false,
         startAtSegmentBoundary: false,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       };
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -2476,7 +2514,8 @@ describe('StreamingEngine', function() {
         rebufferingGoal: 1,
         bufferingGoal: 1,
         smallGapLimit: 0.5,
-        jumpLargeGaps: false
+        jumpLargeGaps: false,
+        durationBackoff: 1
       });
 
       playhead.getTime.and.returnValue(0);
@@ -2695,6 +2734,24 @@ describe('StreamingEngine', function() {
       return { variant: variant1, text: textStream1 };
     } else if (period == manifest.periods[1]) {
       return { variant: variant2, text: textStream2 };
+    } else {
+      throw new Error();
+    }
+  }
+
+  /**
+   * Choose streams for the given period, used for testing unload text stream.
+   * The text stream of the second period is not choosen.
+   *
+   * @param {shakaExtern.Period} period
+   * @return {!Object.<string, !shakaExtern.Stream>}
+   */
+  function onChooseStreamsWithUnloadedText(period) {
+    if (period == manifest.periods[0]) {
+      return { variant: variant1, text: textStream1 };
+    } else if (period == manifest.periods[1]) {
+      expect(streamingEngine.unloadTextStream).toHaveBeenCalled();
+      return { variant: variant2 };
     } else {
       throw new Error();
     }
