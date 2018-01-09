@@ -79,11 +79,11 @@ shakaDemo.audioOnlyPoster_ =
 
 
 /**
- * The registered ID of the v2.2 Chromecast receiver demo.
+ * The registered ID of the v2.3 Chromecast receiver demo.
  * @const {string}
  * @private
  */
-shakaDemo.CC_APP_ID_ = '91580C19';
+shakaDemo.CC_APP_ID_ = 'A15A181D';
 
 
 /**
@@ -209,6 +209,10 @@ shakaDemo.init = function() {
         shakaDemo.postBrowserCheckParams_(params);
         window.addEventListener('hashchange', shakaDemo.updateFromHash_);
       });
+    }).catch(function(error) {
+      // Some part of the setup of the demo app threw an error.
+      // Notify the user of this.
+      shakaDemo.onError_(/** @type {!shaka.util.Error} */ (error));
     });
   }
 };
@@ -663,5 +667,17 @@ if (document.readyState == 'loading' ||
     window.addEventListener('load', shakaDemo.init);
   }
 } else {
-  shakaDemo.init();
+  /**
+   * Poll for Shaka Player on window.  On IE 11, the document is "ready", but
+   * there are still deferred scripts being loaded.  This does not occur on
+   * Chrome or Edge, which set the document's state at the correct time.
+   */
+  var pollForShakaPlayer = function() {
+    if (window.shaka) {
+      shakaDemo.init();
+    } else {
+      setTimeout(pollForShakaPlayer, 100);
+    }
+  };
+  pollForShakaPlayer();
 }
