@@ -194,6 +194,7 @@ shakaExtern.DrmInfo;
 /**
  * @typedef {{
  *   id: number,
+ *   viewpoint: (number|undefined),
  *   language: string,
  *   primary: boolean,
  *   audio: ?shakaExtern.Stream,
@@ -212,6 +213,9 @@ shakaExtern.DrmInfo;
  * @property {number} id
  *   <i>Required.</i> <br>
  *   A unique ID among all Variant objects within the same Manifest.
+ * @property {(number|undefined)} viewpoint
+ *   <i>Defaults to undefined.</i><br>
+ *   The identifier of the camera viewpoint.
  * @property {string} language
  *   <i>Defaults to '' (i.e., unknown).</i> <br>
  *   The Variant's language, specified as a language code. <br>
