@@ -215,8 +215,9 @@ shakaExtern.DrmInfo;
  *   A unique ID among all Variant objects within the same Manifest.
  * @property {(string|undefined)} viewpoint
  *   <i>Defaults to undefined.</i><br>
- *   A string that includes information regarding the type of video (e.g. regular, panoramic)
- *   and the identifying the viewpoint and/or camera associated with the variant.
+ *   A string that includes information regarding the type of video
+ *   (e.g. regular, panoramic) and identifying the viewpoint and/or
+ *   the camera id associated with the variant.
  * @property {string} language
  *   <i>Defaults to '' (i.e., unknown).</i> <br>
  *   The Variant's language, specified as a language code. <br>
